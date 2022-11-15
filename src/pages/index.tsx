@@ -1,12 +1,25 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import UserProfile from "../components/UserProfile";
 import { trpc } from "../utils/trpc";
+import Header from "../components/Header";
+import { useState } from "react";
 
 const Home: NextPage = () => {
   const { data: session, status } = useSession();
 
-  const { data: secretMessage } = trpc.auth.getSecretMessage.useQuery();
+  const { data } = trpc.post.getAll.useQuery();
+
+  const mutation = trpc.post.createPost.useMutation();
+
+  const [title, setTitle] = useState<string>("");
+
+  function createPost(title: string) {
+    if (title !== null) {
+      mutation.mutate({ title });
+    }
+  }
 
   if (status === "loading") {
     return <div>Loading...</div>;
@@ -20,13 +33,35 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <h1>Humble Persimmon</h1>
+        <Header />
         {session ? (
-          <button onClick={() => signOut()}>Sign Out</button>
-        ) : (
-          <button onClick={() => signIn("discord")}>Sign In</button>
-        )}
-        <div>{secretMessage}</div>
+          <>
+            <UserProfile session={session} />
+            <h2 className="m-4">Create a post:</h2>
+            <form
+              className="m-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                createPost(title);
+              }}
+            >
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="text-black"
+                type="text"
+                placeholder="Title"
+              />
+              <button type="submit">Submit</button>
+            </form>
+            {mutation.error ? <p>{mutation.error.message}</p> : null}
+            <div className="m-4">
+              {data?.map((post) => (
+                <div key={post.id}>{post.title}</div>
+              ))}
+            </div>
+          </>
+        ) : null}
       </main>
     </>
   );
