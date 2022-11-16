@@ -9,9 +9,15 @@ import { useState } from "react";
 const Home: NextPage = () => {
   const { data: session, status } = useSession();
 
-  const { data } = trpc.post.getAll.useQuery();
+  const ctx = trpc.useContext();
 
-  const mutation = trpc.post.createPost.useMutation();
+  const { data: posts } = trpc.post.getAll.useQuery();
+
+  const mutation = trpc.post.createPost.useMutation({
+    onSuccess() {
+      ctx.post.invalidate();
+    },
+  });
 
   const [title, setTitle] = useState<string>("");
 
@@ -43,6 +49,7 @@ const Home: NextPage = () => {
               onSubmit={(e) => {
                 e.preventDefault();
                 createPost(title);
+                setTitle("");
               }}
             >
               <input
@@ -56,7 +63,7 @@ const Home: NextPage = () => {
             </form>
             {mutation.error ? <p>{mutation.error.message}</p> : null}
             <div className="m-4">
-              {data?.map((post) => (
+              {posts?.map((post) => (
                 <div key={post.id}>{post.title}</div>
               ))}
             </div>
