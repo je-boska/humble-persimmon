@@ -7,6 +7,8 @@ import Header from "../components/Header";
 import { useState } from "react";
 
 const Home: NextPage = () => {
+  const [title, setTitle] = useState<string>("");
+
   const { data: session, status } = useSession();
 
   const ctx = trpc.useContext();
@@ -14,17 +16,16 @@ const Home: NextPage = () => {
   const { data: posts } = trpc.post.getAll.useQuery();
 
   const mutation = trpc.post.createPost.useMutation({
-    onSuccess() {
-      ctx.post.invalidate();
+    async onSuccess() {
+      await ctx.post.invalidate();
+    },
+    onError({ data }) {
+      console.log(data);
     },
   });
 
-  const [title, setTitle] = useState<string>("");
-
   function createPost(title: string) {
-    if (title !== null) {
-      mutation.mutate({ title });
-    }
+    mutation.mutate({ title });
   }
 
   if (status === "loading") {
@@ -54,14 +55,17 @@ const Home: NextPage = () => {
             >
               <input
                 value={title}
+                disabled={mutation.isLoading}
                 onChange={(e) => setTitle(e.target.value)}
                 className="text-black"
                 type="text"
                 placeholder="Title"
               />
-              <button type="submit">Submit</button>
+              <button type="submit" disabled={mutation.isLoading}>
+                Submit
+              </button>
             </form>
-            {mutation.error ? <p>{mutation.error.message}</p> : null}
+            {mutation.error ? <p>Error: {mutation.error.message}</p> : null}
             <div className="m-4">
               {posts?.map((post) => (
                 <div key={post.id}>{post.title}</div>

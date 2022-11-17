@@ -3,7 +3,11 @@ import { z } from "zod";
 
 export const postRouter = router({
   createPost: publicProcedure
-    .input(z.object({ title: z.string().nullish() }))
+    .input(
+      z.object({
+        title: z.string().min(1),
+      })
+    )
     .mutation(({ input, ctx }) => {
       return prisma?.post.create({
         data: {
