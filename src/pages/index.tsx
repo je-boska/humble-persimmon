@@ -2,31 +2,12 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { useSession } from "next-auth/react";
 import UserProfile from "../components/UserProfile";
-import { trpc } from "../utils/trpc";
 import Header from "../components/Header";
-import { useState } from "react";
+import PostList from "../components/PostList";
+import PostForm from "../components/PostForm";
 
 const Home: NextPage = () => {
-  const [title, setTitle] = useState<string>("");
-
   const { data: session, status } = useSession();
-
-  const ctx = trpc.useContext();
-
-  const { data: posts } = trpc.post.getAll.useQuery();
-
-  const mutation = trpc.post.createPost.useMutation({
-    async onSuccess() {
-      await ctx.post.invalidate();
-    },
-    onError({ data }) {
-      console.log(data);
-    },
-  });
-
-  function createPost(title: string) {
-    mutation.mutate({ title });
-  }
 
   if (status === "loading") {
     return <div>Loading...</div>;
@@ -44,33 +25,8 @@ const Home: NextPage = () => {
         {session ? (
           <>
             <UserProfile session={session} />
-            <h2 className="m-4">Create a post:</h2>
-            <form
-              className="m-4"
-              onSubmit={(e) => {
-                e.preventDefault();
-                createPost(title);
-                setTitle("");
-              }}
-            >
-              <input
-                value={title}
-                disabled={mutation.isLoading}
-                onChange={(e) => setTitle(e.target.value)}
-                className="text-black"
-                type="text"
-                placeholder="Title"
-              />
-              <button type="submit" disabled={mutation.isLoading}>
-                Submit
-              </button>
-            </form>
-            {mutation.error ? <p>Error: {mutation.error.message}</p> : null}
-            <div className="m-4">
-              {posts?.map((post) => (
-                <div key={post.id}>{post.title}</div>
-              ))}
-            </div>
+            <PostForm />
+            <PostList />
           </>
         ) : null}
       </main>
