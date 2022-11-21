@@ -57,10 +57,10 @@ model User {
 }
 
 model Post {
-    id     String  @id @default(cuid())
-    title  String?
+    id     String @id @default(cuid())
+    title  String
     userId String
-    author User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    author User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {

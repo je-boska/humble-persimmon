@@ -1,4 +1,5 @@
 import { trpc } from "../utils/trpc";
+import SinglePost from "./SinglePost";
 
 export default function PostList() {
   const { data: posts } = trpc.post.getAll.useQuery();
@@ -6,7 +7,7 @@ export default function PostList() {
   return (
     <div className="m-4">
       {posts?.map((post) => (
-        <div key={post.id}>{post.title}</div>
+        <SinglePost key={post.id} post={post} />
       ))}
     </div>
   );

@@ -6,7 +6,7 @@ export default function PostForm() {
 
   const ctx = trpc.useContext();
 
-  const mutation = trpc.post.createPost.useMutation({
+  const { mutate, isLoading, isError } = trpc.post.createPost.useMutation({
     async onSuccess() {
       await ctx.post.invalidate();
     },
@@ -16,7 +16,7 @@ export default function PostForm() {
   });
 
   function createPost(title: string) {
-    mutation.mutate({ title });
+    mutate({ title });
   }
 
   return (
@@ -32,17 +32,17 @@ export default function PostForm() {
       >
         <input
           value={title}
-          disabled={mutation.isLoading}
+          disabled={isLoading}
           onChange={(e) => setTitle(e.target.value)}
           className="text-black"
           type="text"
           placeholder="Title"
         />
-        <button type="submit" disabled={mutation.isLoading}>
+        <button type="submit" disabled={isLoading}>
           Submit
         </button>
       </form>
-      {mutation.error ? <p>Error: {mutation.error.message}</p> : null}
+      {isError ? <p>Error sumitting post</p> : null}
     </div>
   );
 }

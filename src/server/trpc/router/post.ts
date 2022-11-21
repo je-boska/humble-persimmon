@@ -16,6 +16,19 @@ export const postRouter = router({
         },
       });
     }),
+  deletePost: publicProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      })
+    )
+    .mutation(({ input }) => {
+      return prisma?.post.delete({
+        where: {
+          id: input.id,
+        },
+      });
+    }),
   getAll: publicProcedure.query(({ ctx }) => {
     return ctx.prisma.post.findMany();
   }),
