@@ -29,6 +29,23 @@ export const postRouter = router({
         },
       });
     }),
+  editPost: publicProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        title: z.string().min(1),
+      })
+    )
+    .mutation(({ input }) => {
+      return prisma?.post.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          title: input.title,
+        },
+      });
+    }),
   getAll: publicProcedure.query(({ ctx }) => {
     return ctx.prisma.post.findMany();
   }),

@@ -6,7 +6,11 @@ export default function PostForm() {
 
   const ctx = trpc.useContext();
 
-  const { mutate, isLoading, isError } = trpc.post.createPost.useMutation({
+  const {
+    mutate: createPost,
+    isLoading,
+    isError,
+  } = trpc.post.createPost.useMutation({
     async onSuccess() {
       await ctx.post.invalidate();
     },
@@ -15,10 +19,6 @@ export default function PostForm() {
     },
   });
 
-  function createPost(title: string) {
-    mutate({ title });
-  }
-
   return (
     <div>
       <h2 className="m-4">Create a post:</h2>
@@ -26,7 +26,7 @@ export default function PostForm() {
         className="m-4"
         onSubmit={(e) => {
           e.preventDefault();
-          createPost(title);
+          createPost({ title });
           setTitle("");
         }}
       >
@@ -34,7 +34,7 @@ export default function PostForm() {
           value={title}
           disabled={isLoading}
           onChange={(e) => setTitle(e.target.value)}
-          className="text-black"
+          className="mr-2 text-black"
           type="text"
           placeholder="Title"
         />
