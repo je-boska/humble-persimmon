@@ -10,8 +10,8 @@ export default function SinglePost({ post }: { post: Post }) {
 
   const {
     mutate: deletePost,
-    isLoading,
-    isError,
+    isError: isDeleteError,
+    isLoading: isDeleteLoading,
   } = trpc.post.deletePost.useMutation({
     onSuccess() {
       ctx.post.getAll.invalidate();
@@ -41,15 +41,15 @@ export default function SinglePost({ post }: { post: Post }) {
               setIsEditing(true);
               setEditTitle(title);
             }}
-            disabled={isLoading}
+            disabled={isEditing || isEditLoading}
           >
             e
           </button>
-          <button onClick={() => deletePost({ id })} disabled={isLoading}>
+          <button onClick={() => deletePost({ id })} disabled={isDeleteLoading}>
             x
           </button>
         </div>
-        {isError ? <p>Error deleting post</p> : null}
+        {isDeleteError ? <p>Error deleting post</p> : null}
       </div>
       {isEditing ? (
         <form
@@ -62,7 +62,7 @@ export default function SinglePost({ post }: { post: Post }) {
         >
           <input
             value={editTitle}
-            disabled={isLoading}
+            disabled={isDeleteLoading || isEditLoading}
             onChange={(e) => setEditTitle(e.target.value)}
             className="mr-2 text-black"
             type="text"
